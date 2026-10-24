@@ -1,0 +1,27 @@
+name: Build Windows preview (manual)
+on:
+  workflow_dispatch:
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Build EXE with PyInstaller
+        run: pyinstaller --noconfirm --clean --windowed --onefile --name uploaderjp-backup --collect-all playwright app.py
+      - name: Upload unsigned preview for manual E2E testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: uploaderjp-backup-unsigned-preview
+          path: dist/uploaderjp-backup.exe
+          if-no-files-found: error
+          retention-days: 7
